@@ -121,6 +121,22 @@
             border-color: #4dc9d6;
         }
 
+        .btn-new-class {
+            background: #4dc9d6;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 12px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-new-class:hover { background: #38b2bd; }
+
         /* --- flash messages --- */
         .flash {
             padding: 7px 10px;
@@ -179,7 +195,7 @@
             <div class="pill-row" style="margin-top:8px;">
                 {% if classes %}
                     {% for cls in classes %}
-                        <a href="#" class="btn-create">{{ cls.class_name }}</a>
+                        <a href="{{ url_for('class_view', class_id=cls.class_id) }}" class="btn-create">{{ cls.class_name }}</a>
                     {% endfor %}
                 {% else %}
                     <p class="placeholder">No classes yet.</p>
@@ -188,14 +204,8 @@
         </div>
 
         <!-- Create buttons -->
-        <div>
-            <p class="section-label">Create:</p>
-            <div class="create-row">
-                <a href="{{ url_for('create_class_route') }}" class="btn-create">Class</a>
-                <button class="btn-create" type="button">Lesson</button>
-                <button class="btn-create" type="button">Answer Form</button>
-                <button class="btn-create" type="button">QR Code</button>
-            </div>
+        <div class="create-row">
+            <a href="{{ url_for('create_class_route') }}" class="btn-new-class">+ New Class</a>
         </div>
 
         <div class="logout-wrap">

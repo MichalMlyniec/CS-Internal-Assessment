@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 16px;
+        }
+
+        .card {
+            width: 300px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .card-header {
+            background: #4dc9d6;
+            padding: 24px 0;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-text {
+            font-size: 0.92rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .flash {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .flash.error   { background: #fde8e8; color: #c0392b; }
+        .flash.success { background: #e8fde8; color: #27ae60; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>{{ title }}</h1>
+    </div>
+    <div class="card-body">
+
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <p class="message-text">{{ message }}</p>
+
+    </div>
+</div>
+
+</body>
+</html>

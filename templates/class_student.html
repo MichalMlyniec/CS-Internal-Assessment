@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ label }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 16px;
+        }
+
+        .card {
+            width: 520px;
+            max-width: 100%;
+            border: 2px solid #b0b0b0;
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #4dc9d6;
+            padding: 18px 0;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.55rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .section-label {
+            font-weight: bold;
+            font-size: 0.92rem;
+            color: #111;
+            margin-bottom: 8px;
+        }
+
+        .meta-label {
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .placeholder {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .trend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: #333;
+        }
+
+        .bar-label {
+            width: 110px;
+            flex-shrink: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .bar-track {
+            flex: 1;
+            background: #eee;
+            border-radius: 4px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            background: #4dc9d6;
+            height: 100%;
+        }
+
+        .bar-count {
+            width: 30px;
+            text-align: right;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table.history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        table.history-table th,
+        table.history-table td {
+            border: 1px solid #e0e0e0;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        table.history-table th {
+            background: #f0f4f8;
+            color: #111;
+        }
+
+        .flash {
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-size: 0.83rem;
+            text-align: center;
+        }
+        .flash.error   { background: #fde8e8; color: #c0392b; }
+        .flash.success { background: #e8fde8; color: #27ae60; }
+
+        .back-link {
+            font-size: 0.8rem;
+            color: #888;
+            text-decoration: none;
+            text-align: center;
+        }
+        .back-link:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>{{ label }}</h1>
+    </div>
+    <div class="card-body">
+
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <p class="meta-label">Class: <strong>{{ class_info.class_name }}</strong> ({{ class_info.year_id }})</p>
+
+        <div>
+            <p class="section-label">Engagement Trend:</p>
+            <p class="meta-label">{{ engagement.trend }}</p>
+            {% if engagement.points %}
+                <div class="trend-list">
+                    {% for point in engagement.points %}
+                        <div class="bar-row">
+                            <span class="bar-label">{{ point.lesson_name }}</span>
+                            <div class="bar-track"><div class="bar-fill" style="width: {{ (point.score / engagement.max_score * 100) if engagement.max_score else 0 }}%;"></div></div>
+                            <span class="bar-count">{{ '%.1f'|format(point.score) }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <p class="section-label">Answers Over Time:</p>
+            {% if history %}
+                <div class="table-wrap">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Lesson</th>
+                                <th>Date</th>
+                                <th>Question</th>
+                                <th>Answer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                                {% for answer in entry.answers %}
+                                    <tr>
+                                        <td>{{ entry.lesson_name }}</td>
+                                        <td>{{ entry.lesson_date }}</td>
+                                        <td>{{ answer.question_text }}</td>
+                                        <td>{{ answer.answer_text.replace('|', ', ') }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="placeholder">No answers recorded yet.</p>
+            {% endif %}
+        </div>
+
+        <a href="{{ url_for('class_view', class_id=class_info.class_id) }}" class="back-link">← Back to class</a>
+
+    </div>
+</div>
+
+</body>
+</html>

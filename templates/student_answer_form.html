@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ lesson_info.lesson_name }} – Feedback</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 16px;
+        }
+
+        .card {
+            width: 340px;
+            border: 2px solid #b0b0b0;
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #4dc9d6;
+            padding: 18px 0;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.35rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .context-label {
+            font-size: 0.85rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .flash {
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-size: 0.83rem;
+            text-align: center;
+        }
+        .flash.error   { background: #fde8e8; color: #c0392b; }
+        .flash.success { background: #e8fde8; color: #27ae60; }
+
+        .question-block {
+            border: 1px solid #d5d5d5;
+            border-radius: 6px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .question-text {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #111;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #b0b0b0;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            font-family: inherit;
+            outline: none;
+            resize: vertical;
+        }
+        textarea:focus { border-color: #4dc9d6; }
+
+        .options-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .options-col label,
+        .yes-no-row label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+            color: #222;
+        }
+
+        .yes-no-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn-submit {
+            background: #4dc9d6;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 60%;
+            align-self: center;
+        }
+        .btn-submit:hover { background: #38b2bd; }
+
+        .back-link {
+            font-size: 0.8rem;
+            color: #888;
+            text-decoration: none;
+            text-align: center;
+        }
+        .back-link:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>{{ lesson_info.lesson_name }}</h1>
+    </div>
+    <div class="card-body">
+
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <p class="context-label">{{ lesson_info.class_name }} &middot; {{ lesson_info.lesson_date }}</p>
+
+        <form method="POST" style="display:flex; flex-direction:column; gap:14px;">
+
+            {% for question in questions %}
+                <div class="question-block">
+                    <p class="question-text">{{ loop.index }}. {{ question.question_text }}</p>
+
+                    {% if question.question_type == 'written' %}
+                        <textarea name="question_{{ question.question_id }}" rows="3" placeholder="Type your answer here"></textarea>
+
+                    {% elif question.question_type == 'yes_no' %}
+                        <div class="yes-no-row">
+                            <label><input type="radio" name="question_{{ question.question_id }}" value="Yes" required> Yes</label>
+                            <label><input type="radio" name="question_{{ question.question_id }}" value="No"> No</label>
+                        </div>
+
+                    {% elif question.question_type == 'one_answer' %}
+                        <div class="options-col">
+                            {% for option in question.options %}
+                                <label><input type="radio" name="question_{{ question.question_id }}" value="{{ option }}"> {{ option }}</label>
+                            {% endfor %}
+                        </div>
+
+                    {% elif question.question_type == 'multiple_choice' %}
+                        <div class="options-col">
+                            {% for option in question.options %}
+                                <label><input type="checkbox" name="question_{{ question.question_id }}[]" value="{{ option }}"> {{ option }}</label>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-submit">Submit</button>
+
+        </form>
+
+        <a href="{{ url_for('student_logout') }}" class="back-link">Log out</a>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Lesson</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 16px;
+        }
+
+        .card {
+            width: 320px;
+            border: 2px solid #b0b0b0;
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #4dc9d6;
+            padding: 18px 0;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.55rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .section-label {
+            font-weight: bold;
+            font-size: 0.92rem;
+            color: #111;
+            margin-bottom: 8px;
+        }
+
+        .class-label {
+            font-size: 0.9rem;
+            color: #333;
+            text-align: center;
+        }
+
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #b0b0b0;
+            border-radius: 4px;
+            font-size: 0.92rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus { border-color: #4dc9d6; }
+
+        .btn-create {
+            background: #4dc9d6;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 60%;
+            align-self: center;
+        }
+
+        .btn-create:hover { background: #38b2bd; }
+
+        .flash {
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-size: 0.83rem;
+            text-align: center;
+        }
+        .flash.error   { background: #fde8e8; color: #c0392b; }
+        .flash.success { background: #e8fde8; color: #27ae60; }
+
+        .back-link {
+            font-size: 0.8rem;
+            color: #888;
+            text-decoration: none;
+            text-align: center;
+        }
+        .back-link:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>Create Lesson</h1>
+    </div>
+    <div class="card-body">
+
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <p class="class-label">Class: <strong>{{ class_info.class_name }}</strong> ({{ class_info.year_id }})</p>
+
+        <form method="POST" action="{{ url_for('create_lesson_route', class_id=class_info.class_id) }}" style="display:flex; flex-direction:column; gap:14px;">
+
+            <div>
+                <p class="section-label">Date:</p>
+                <input type="date" name="lesson_date" required>
+            </div>
+
+            <div>
+                <p class="section-label">Name of the Lesson:</p>
+                <input type="text" name="lesson_name" placeholder="Type name" required>
+            </div>
+
+            <button type="submit" class="btn-create">Create</button>
+
+        </form>
+
+        <a href="{{ url_for('class_view', class_id=class_info.class_id) }}" class="back-link">← Back to class</a>
+
+    </div>
+</div>
+
+</body>
+</html>

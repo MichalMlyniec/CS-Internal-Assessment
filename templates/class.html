@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ class_info.class_name }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 16px;
+        }
+
+        .card {
+            width: 320px;
+            border: 2px solid #b0b0b0;
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #4dc9d6;
+            padding: 18px 0;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.55rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .section-label {
+            font-weight: bold;
+            font-size: 0.92rem;
+            color: #111;
+            margin-bottom: 8px;
+        }
+
+        .year-label {
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .pill-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-create {
+            border: 1px solid #b0b0b0;
+            border-radius: 12px;
+            background: #fff;
+            padding: 7px 10px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            color: #222;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-create:hover {
+            background: #4dc9d6;
+            color: #fff;
+            border-color: #4dc9d6;
+        }
+
+        .lesson-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.3;
+        }
+
+        .lesson-pill .lesson-date {
+            font-size: 0.68rem;
+            color: inherit;
+            opacity: 0.75;
+        }
+
+        .placeholder {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .create-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .flash {
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-size: 0.83rem;
+            text-align: center;
+        }
+        .flash.error   { background: #fde8e8; color: #c0392b; }
+        .flash.success { background: #e8fde8; color: #27ae60; }
+
+        .back-link {
+            font-size: 0.8rem;
+            color: #888;
+            text-decoration: none;
+            text-align: center;
+        }
+        .back-link:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>{{ class_info.class_name }}</h1>
+    </div>
+    <div class="card-body">
+
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <p class="year-label">Year: {{ class_info.year_id }}</p>
+
+        <div>
+            <p class="section-label">Lessons:</p>
+            <div class="pill-row">
+                {% if lessons %}
+                    {% for lesson in lessons %}
+                        <a href="{{ url_for('lesson_view', lesson_id=lesson.lesson_id) }}" class="btn-create lesson-pill">
+                            <span>{{ lesson.lesson_name }}</span>
+                            <span class="lesson-date">{{ lesson.lesson_date }}</span>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="placeholder">No lessons yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="create-row">
+            <a href="{{ url_for('create_lesson_route', class_id=class_info.class_id) }}" class="btn-create">+ Create Lesson</a>
+            <a href="{{ url_for('class_answer_form_route', class_id=class_info.class_id) }}" class="btn-create">Default Answer Form</a>
+        </div>
+
+        <div>
+            <p class="section-label">Students:</p>
+            <div class="pill-row">
+                {% if students %}
+                    {% for student in students %}
+                        <a href="{{ url_for('class_student_view', class_id=class_info.class_id, student_id=student.student_id) }}" class="btn-create">{{ student.label }}</a>
+                    {% endfor %}
+                {% else %}
+                    <p class="placeholder">No student answers yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <a href="/dashboard" class="back-link">← Back to dashboard</a>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 16px;
+        }
+
+        .card {
+            width: 340px;
+            border: 2px solid #b0b0b0;
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #4dc9d6;
+            padding: 18px 0;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.35rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .section-label {
+            font-weight: bold;
+            font-size: 0.92rem;
+            color: #111;
+            margin-bottom: 8px;
+        }
+
+        .context-label {
+            font-size: 0.85rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .flash {
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-size: 0.83rem;
+            text-align: center;
+        }
+        .flash.error   { background: #fde8e8; color: #c0392b; }
+        .flash.success { background: #e8fde8; color: #27ae60; }
+
+        #questions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .question-block {
+            border: 1px solid #d5d5d5;
+            border-radius: 6px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .question-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .question-type-badge {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #fff;
+            background: #4dc9d6;
+            border-radius: 10px;
+            padding: 2px 8px;
+        }
+
+        .btn-remove, .btn-remove-option {
+            border: none;
+            background: none;
+            color: #c0392b;
+            font-size: 1rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #b0b0b0;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus { border-color: #4dc9d6; }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .option-row input[type="text"] {
+            flex: 1;
+        }
+
+        .option-marker {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #999;
+            flex-shrink: 0;
+        }
+
+        .option-marker.circle { border-radius: 50%; }
+        .option-marker.square { border-radius: 3px; }
+
+        .btn-add-option {
+            align-self: flex-start;
+            border: none;
+            background: none;
+            color: #38b2bd;
+            font-size: 0.78rem;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .add-question-row {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 12px;
+        }
+
+        .type-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-type {
+            border: 1px solid #b0b0b0;
+            border-radius: 12px;
+            background: #fff;
+            padding: 6px 10px;
+            font-size: 0.76rem;
+            cursor: pointer;
+            color: #222;
+        }
+
+        .btn-type:hover {
+            background: #4dc9d6;
+            color: #fff;
+            border-color: #4dc9d6;
+        }
+
+        .btn-submit {
+            background: #4dc9d6;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 60%;
+            align-self: center;
+        }
+
+        .btn-submit:hover { background: #38b2bd; }
+
+        .back-link {
+            font-size: 0.8rem;
+            color: #888;
+            text-decoration: none;
+            text-align: center;
+        }
+        .back-link:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>{{ title }}</h1>
+    </div>
+    <div class="card-body">
+
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <p class="context-label">{{ context_label }}</p>
+
+        <form method="POST" action="{{ action_url }}" style="display:flex; flex-direction:column; gap:14px;">
+
+            <div>
+                <p class="section-label">Questions (max {{ max_questions }}):</p>
+                <div id="questions-container"></div>
+            </div>
+
+            <div class="add-question-row">
+                <p class="section-label">+ Add question</p>
+                <div class="type-buttons">
+                    <button type="button" class="btn-type" onclick="addQuestion('one_answer')">One answer</button>
+                    <button type="button" class="btn-type" onclick="addQuestion('multiple_choice')">Multiple choice</button>
+                    <button type="button" class="btn-type" onclick="addQuestion('yes_no')">Yes/No</button>
+                    <button type="button" class="btn-type" onclick="addQuestion('written')">Written answer</button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Create</button>
+
+        </form>
+
+        <a href="{{ back_url }}" class="back-link">← Back</a>
+
+    </div>
+</div>
+
+<script>
+    const MAX_QUESTIONS = {{ max_questions }};
+    const TYPE_LABELS = {
+        one_answer: 'One answer',
+        multiple_choice: 'Multiple choice',
+        yes_no: 'Yes / No',
+        written: 'Written answer'
+    };
+
+    let questionCount = 0;
+    const container = document.getElementById('questions-container');
+
+    function addQuestion(type, existingText, existingOptions) {
+        if (container.children.length >= MAX_QUESTIONS) {
+            alert('You can add up to ' + MAX_QUESTIONS + ' questions.');
+            return;
+        }
+
+        const index = questionCount++;
+
+        const block = document.createElement('div');
+        block.className = 'question-block';
+        block.dataset.index = index;
+        container.appendChild(block);
+
+        const head = document.createElement('div');
+        head.className = 'question-head';
+
+        const badge = document.createElement('span');
+        badge.className = 'question-type-badge';
+        badge.textContent = TYPE_LABELS[type];
+        head.appendChild(badge);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove';
+        removeBtn.textContent = '×';
+        removeBtn.onclick = function () { block.remove(); };
+        head.appendChild(removeBtn);
+
+        block.appendChild(head);
+
+        const typeInput = document.createElement('input');
+        typeInput.type = 'hidden';
+        typeInput.name = 'question_type_' + index;
+        typeInput.value = type;
+        block.appendChild(typeInput);
+
+        const textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.name = 'question_text_' + index;
+        textInput.placeholder = 'Type your question';
+        textInput.required = true;
+        textInput.value = existingText || '';
+        block.appendChild(textInput);
+
+        if (type === 'one_answer' || type === 'multiple_choice') {
+            const optionsList = document.createElement('div');
+            optionsList.className = 'options-list';
+            optionsList.dataset.marker = (type === 'one_answer') ? 'circle' : 'square';
+            block.appendChild(optionsList);
+
+            const addOptBtn = document.createElement('button');
+            addOptBtn.type = 'button';
+            addOptBtn.className = 'btn-add-option';
+            addOptBtn.textContent = '+ Add option';
+            addOptBtn.onclick = function () { addOption(index); };
+            block.appendChild(addOptBtn);
+
+            const opts = (existingOptions && existingOptions.length) ? existingOptions : ['', ''];
+            opts.forEach(function (opt) { addOption(index, opt); });
+        }
+    }
+
+    function addOption(index, existingValue) {
+        const list = container.querySelector('.question-block[data-index="' + index + '"] .options-list');
+        const marker = list.dataset.marker;
+
+        const row = document.createElement('div');
+        row.className = 'option-row';
+
+        const markerSpan = document.createElement('span');
+        markerSpan.className = 'option-marker ' + marker;
+        row.appendChild(markerSpan);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'options_' + index + '[]';
+        input.placeholder = 'Add an answer';
+        input.value = existingValue || '';
+        row.appendChild(input);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-option';
+        removeBtn.textContent = '×';
+        removeBtn.onclick = function () { row.remove(); };
+        row.appendChild(removeBtn);
+
+        list.appendChild(row);
+    }
+
+    {% for question in questions %}
+        addQuestion(
+            {{ question.question_type|tojson }},
+            {{ question.question_text|tojson }},
+            {{ question.options|tojson }}
+        );
+    {% endfor %}
+</script>
+
+</body>
+</html>

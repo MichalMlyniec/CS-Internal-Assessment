@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson Feedback – Log In</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 16px;
+        }
+
+        .card {
+            width: 300px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .card-header {
+            background: #4dc9d6;
+            padding: 24px 0;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .context-label {
+            font-size: 0.85rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .section-label {
+            font-weight: bold;
+            font-size: 0.88rem;
+            color: #111;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus { border-color: #4dc9d6; }
+
+        .flash {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .flash.error   { background: #fde8e8; color: #c0392b; }
+        .flash.success { background: #e8fde8; color: #27ae60; }
+
+        .btn-submit {
+            background: #4dc9d6;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 60%;
+            align-self: center;
+        }
+        .btn-submit:hover { background: #38b2bd; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <div class="card-header">
+        <h1>Lesson Feedback</h1>
+    </div>
+
+    <div class="card-body">
+
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <p class="context-label">{{ lesson_info.lesson_name }} &middot; {{ lesson_info.class_name }}</p>
+
+        <p class="section-label">Log in</p>
+        <form method="POST" action="{{ url_for('student_login_route', lesson_id=lesson_info.lesson_id) }}">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <input type="text" name="username" placeholder="Username" required autocomplete="username">
+                <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+                <button type="submit" class="btn-submit">Log in</button>
+            </div>
+        </form>
+
+        <div class="divider">or</div>
+
+        <p class="section-label">Sign up</p>
+        <form method="POST" action="{{ url_for('student_signup_route', lesson_id=lesson_info.lesson_id) }}">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <input type="text" name="username" placeholder="Username" required autocomplete="username">
+                <input type="password" name="password" placeholder="Password" required autocomplete="new-password">
+                <input type="password" name="confirm_password" placeholder="Confirm Password" required autocomplete="new-password">
+                <button type="submit" class="btn-submit">Sign up</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>
