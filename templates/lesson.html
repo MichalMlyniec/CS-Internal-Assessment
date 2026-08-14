@@ -309,13 +309,8 @@
         <div>
             <p class="section-label">QR Code:</p>
             {% if questions %}
-                <p class="hint-text">Point students' cameras at this image on your screen — a downloaded PDF often scans worse (viewer scaling, screen glare):</p>
                 <img src="{{ url_for('lesson_qr_code_image', lesson_id=lesson_info.lesson_id) }}" alt="QR code linking to this lesson's answer form" class="qr-image">
                 <a href="{{ url_for('lesson_qr_code', lesson_id=lesson_info.lesson_id) }}" class="btn-create">Download as PDF (for printing)</a>
-                <p class="hint-text">
-                    Scanning not working? On the student's device, open this link directly instead
-                    (it must be on the same Wi-Fi network as this computer):
-                </p>
                 <p class="link-preview">{{ respond_url }}</p>
             {% else %}
                 <p class="placeholder">No answer form assigned to this lesson yet — create one to generate a QR code.</p>

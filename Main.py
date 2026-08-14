@@ -109,9 +109,9 @@ init_db()
 def build_respond_url(lesson_id):
     respond_path = url_for('lesson_respond', lesson_id=lesson_id)
     host = request.host.split(':')[0]
-    if host in ('localhost', '127.0.0.1'):
-        return f'http://{get_lan_ip()}:5000{respond_path}'
-    return request.url_root.rstrip('/') + respond_path
+    if host.endswith('.pythonanywhere.com'):
+        return request.url_root.rstrip('/') + respond_path
+    return f'http://{get_lan_ip()}:5000{respond_path}'
 
 
 class Student:
