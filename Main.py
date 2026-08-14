@@ -106,6 +106,14 @@ def init_db():
 init_db()
 
 
+def build_respond_url(lesson_id):
+    respond_path = url_for('lesson_respond', lesson_id=lesson_id)
+    host = request.host.split(':')[0]
+    if host in ('localhost', '127.0.0.1'):
+        return f'http://{get_lan_ip()}:5000{respond_path}'
+    return request.url_root.rstrip('/') + respond_path
+
+
 class Student:
     def __init__(self, student_id, username, class_id):
         self.student_id = student_id
@@ -308,8 +316,7 @@ def lesson_view(lesson_id):
 
     respond_url = None
     if effective_form:
-        respond_path = url_for('lesson_respond', lesson_id=lesson_id)
-        respond_url = f'http://{get_lan_ip()}:5000{respond_path}'
+        respond_url = build_respond_url(lesson_id)
 
     return render_template('lesson.html',
         lesson_info=lesson_info,
@@ -338,8 +345,7 @@ def lesson_qr_code(lesson_id):
         flash('This lesson has no answer form yet (no default or custom form exists), so a QR code cannot be generated.', 'error')
         return redirect(url_for('lesson_view', lesson_id=lesson_id))
 
-    respond_path = url_for('lesson_respond', lesson_id=lesson_id)
-    respond_url = f'http://{get_lan_ip()}:5000{respond_path}'
+    respond_url = build_respond_url(lesson_id)
     buffer = generate_qr_code(respond_url, image_format='PDF', resolution=180.0)
 
     safe_name = ''.join(char if char.isalnum() else '_' for char in lesson_info['lesson_name'])
@@ -366,8 +372,7 @@ def lesson_qr_code_image(lesson_id):
         flash('This lesson has no answer form yet (no default or custom form exists), so a QR code cannot be generated.', 'error')
         return redirect(url_for('lesson_view', lesson_id=lesson_id))
 
-    respond_path = url_for('lesson_respond', lesson_id=lesson_id)
-    respond_url = f'http://{get_lan_ip()}:5000{respond_path}'
+    respond_url = build_respond_url(lesson_id)
     buffer = generate_qr_code(respond_url, image_format='PNG')
 
     return send_file(buffer, mimetype='image/png')
