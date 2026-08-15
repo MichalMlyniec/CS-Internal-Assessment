@@ -51,6 +51,26 @@ def get_lesson(lesson_id, teacher_id):
     return lesson
 
 
+def delete_lesson(lesson_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM responses WHERE lesson_id = ?', (lesson_id,))
+    cursor.execute(
+        'DELETE FROM question_options WHERE question_id IN '
+        '(SELECT question_id FROM questions WHERE form_id IN '
+        '(SELECT form_id FROM answer_forms WHERE lesson_id = ?))',
+        (lesson_id,)
+    )
+    cursor.execute(
+        'DELETE FROM questions WHERE form_id IN (SELECT form_id FROM answer_forms WHERE lesson_id = ?)',
+        (lesson_id,)
+    )
+    cursor.execute('DELETE FROM answer_forms WHERE lesson_id = ?', (lesson_id,))
+    cursor.execute('DELETE FROM lessons WHERE lesson_id = ?', (lesson_id,))
+    conn.commit()
+    conn.close()
+
+
 def get_lesson_public(lesson_id):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row

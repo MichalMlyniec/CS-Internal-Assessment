@@ -2,9 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from datetime import date
 from Login_Signup import DB_PATH, register_teacher, login_teacher, register_student, login_student
 from Year import current_school_year, make_year_string, parse_start_year
-from Class import create_class, get_classes, get_class
+from Class import create_class, get_classes, get_class, delete_class
 from Lesson import (
-    create_lesson, get_lessons, get_lesson, get_lesson_public, generate_qr_code, get_lan_ip,
+    create_lesson, get_lessons, get_lesson, get_lesson_public, delete_lesson, generate_qr_code, get_lan_ip,
     get_class_students, get_lesson_student_breakdown, get_student_history, get_student_engagement_summary
 )
 from Answer_Form import (
@@ -239,6 +239,21 @@ def class_view(class_id):
     return render_template('class.html', class_info=class_info, lessons=lessons, students=students)
 
 
+@app.route('/class/<int:class_id>/delete', methods=['POST'])
+def delete_class_route(class_id):
+    if 'teacher_id' not in session:
+        return redirect(url_for('login'))
+
+    class_info = get_class(class_id, session['teacher_id'])
+    if class_info is None:
+        flash('Class not found.', 'error')
+        return redirect(url_for('dashboard'))
+
+    delete_class(class_id)
+    flash('Class deleted.', 'success')
+    return redirect(url_for('dashboard'))
+
+
 @app.route('/class/<int:class_id>/create_lesson', methods=['GET', 'POST'])
 def create_lesson_route(class_id):
     if 'teacher_id' not in session:
@@ -314,10 +329,6 @@ def lesson_view(lesson_id):
     )
     is_upcoming        = date.fromisoformat(lesson_info['lesson_date']) >= date.today()
 
-    respond_url = None
-    if effective_form:
-        respond_url = build_respond_url(lesson_id)
-
     return render_template('lesson.html',
         lesson_info=lesson_info,
         questions=questions,
@@ -325,9 +336,24 @@ def lesson_view(lesson_id):
         response_count=response_count,
         statistics=statistics,
         student_breakdown=student_breakdown,
-        is_upcoming=is_upcoming,
-        respond_url=respond_url
+        is_upcoming=is_upcoming
     )
+
+
+@app.route('/lesson/<int:lesson_id>/delete', methods=['POST'])
+def delete_lesson_route(lesson_id):
+    if 'teacher_id' not in session:
+        return redirect(url_for('login'))
+
+    lesson_info = get_lesson(lesson_id, session['teacher_id'])
+    if lesson_info is None:
+        flash('Lesson not found.', 'error')
+        return redirect(url_for('dashboard'))
+
+    class_id = lesson_info['class_id']
+    delete_lesson(lesson_id)
+    flash('Lesson deleted.', 'success')
+    return redirect(url_for('class_view', class_id=class_id))
 
 
 @app.route('/lesson/<int:lesson_id>/qr_code')

@@ -58,23 +58,6 @@
             color: #333;
         }
 
-        .question-preview-list {
-            margin-top: 6px;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .question-preview-line {
-            font-size: 0.8rem;
-            color: #333;
-        }
-
-        .question-preview-line .q-type {
-            font-size: 0.72rem;
-            color: #777;
-        }
-
         .stats-list {
             display: flex;
             flex-direction: column;
@@ -168,10 +151,11 @@
             margin-bottom: 14px;
         }
 
-        .hint-text {
-            font-size: 0.76rem;
-            color: #777;
-            margin-top: 8px;
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
         }
 
         .qr-image {
@@ -182,16 +166,6 @@
             padding: 8px;
             background: #fff;
             image-rendering: pixelated;
-        }
-
-        .link-preview {
-            font-size: 0.76rem;
-            color: #333;
-            background: #f5f5f5;
-            border-radius: 4px;
-            padding: 6px 8px;
-            word-break: break-all;
-            user-select: all;
         }
 
         .btn-create {
@@ -245,14 +219,11 @@
 
         <p class="meta-label">Class: <strong>{{ lesson_info.class_name }}</strong> &middot; {{ lesson_info.lesson_date }}</p>
 
-        {% if questions %}
+        {% if is_upcoming %}
             <div>
-                <p class="meta-label">Answer form in use: <strong>{{ 'Custom form for this lesson' if is_custom else 'Class default' }}</strong></p>
-                <div class="question-preview-list">
-                    {% for question in questions %}
-                        <p class="question-preview-line">{{ loop.index }}. {{ question.question_text }} <span class="q-type">({{ question.question_type.replace('_', ' ') }})</span></p>
-                    {% endfor %}
-                </div>
+                <a href="{{ url_for('lesson_answer_form_route', lesson_id=lesson_info.lesson_id) }}" class="btn-create">
+                    {% if is_custom %}Edit Custom Answer Form{% else %}Create Custom Answer Form{% endif %}
+                </a>
             </div>
         {% endif %}
 
@@ -282,11 +253,6 @@
                 </div>
             {% else %}
                 <p class="placeholder">No student responses yet.</p>
-                {% if is_upcoming %}
-                    <a href="{{ url_for('lesson_answer_form_route', lesson_id=lesson_info.lesson_id) }}" class="btn-create">
-                        {% if questions %}Edit Custom Answer Form{% else %}Create Custom Answer Form{% endif %}
-                    </a>
-                {% endif %}
             {% endif %}
         </div>
 
@@ -306,12 +272,11 @@
             </div>
         {% endif %}
 
-        <div>
+        <div class="qr-section">
             <p class="section-label">QR Code:</p>
             {% if questions %}
                 <img src="{{ url_for('lesson_qr_code_image', lesson_id=lesson_info.lesson_id) }}" alt="QR code linking to this lesson's answer form" class="qr-image">
                 <a href="{{ url_for('lesson_qr_code', lesson_id=lesson_info.lesson_id) }}" class="btn-create">Download as PDF (for printing)</a>
-                <p class="link-preview">{{ respond_url }}</p>
             {% else %}
                 <p class="placeholder">No answer form assigned to this lesson yet — create one to generate a QR code.</p>
             {% endif %}

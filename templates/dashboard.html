@@ -121,6 +121,32 @@
             border-color: #4dc9d6;
         }
 
+        .pill-wrap {
+            position: relative;
+            display: inline-block;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            border: none;
+            border-radius: 50%;
+            background: #e74c3c;
+            color: #fff;
+            font-size: 0.7rem;
+            line-height: 18px;
+            text-align: center;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
         .btn-new-class {
             background: #4dc9d6;
             color: #fff;
@@ -195,7 +221,12 @@
             <div class="pill-row" style="margin-top:8px;">
                 {% if classes %}
                     {% for cls in classes %}
-                        <a href="{{ url_for('class_view', class_id=cls.class_id) }}" class="btn-create">{{ cls.class_name }}</a>
+                        <div class="pill-wrap">
+                            <a href="{{ url_for('class_view', class_id=cls.class_id) }}" class="btn-create">{{ cls.class_name }}</a>
+                            <form method="POST" action="{{ url_for('delete_class_route', class_id=cls.class_id) }}" onsubmit="return confirm('Delete this class? All its lessons, answer forms, and collected responses will be permanently deleted.');">
+                                <button type="submit" class="delete-btn" title="Delete class">🗑</button>
+                            </form>
+                        </div>
                     {% endfor %}
                 {% else %}
                     <p class="placeholder">No classes yet.</p>

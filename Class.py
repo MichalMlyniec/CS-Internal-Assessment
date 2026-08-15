@@ -36,3 +36,28 @@ def get_class(class_id, teacher_id):
     class_row = cursor.fetchone()
     conn.close()
     return class_row
+
+
+def delete_class(class_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        'DELETE FROM responses WHERE lesson_id IN (SELECT lesson_id FROM lessons WHERE class_id = ?)',
+        (class_id,)
+    )
+    cursor.execute(
+        'DELETE FROM question_options WHERE question_id IN '
+        '(SELECT question_id FROM questions WHERE form_id IN '
+        '(SELECT form_id FROM answer_forms WHERE class_id = ?))',
+        (class_id,)
+    )
+    cursor.execute(
+        'DELETE FROM questions WHERE form_id IN (SELECT form_id FROM answer_forms WHERE class_id = ?)',
+        (class_id,)
+    )
+    cursor.execute('DELETE FROM answer_forms WHERE class_id = ?', (class_id,))
+    cursor.execute('DELETE FROM lessons WHERE class_id = ?', (class_id,))
+    cursor.execute('DELETE FROM class_student_labels WHERE class_id = ?', (class_id,))
+    cursor.execute('DELETE FROM classes WHERE class_id = ?', (class_id,))
+    conn.commit()
+    conn.close()
