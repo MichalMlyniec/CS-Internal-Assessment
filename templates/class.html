@@ -160,6 +160,9 @@
         {% endfor %}
 
         <p class="year-label">Year: {{ class_info.year_id }}</p>
+        {% if origin_class %}
+            <p class="year-label">Continued from <a href="{{ url_for('class_view', class_id=origin_class.class_id) }}">{{ origin_class.class_name }} ({{ origin_class.year_id }})</a></p>
+        {% endif %}
 
         <div>
             <p class="section-label">Lessons:</p>

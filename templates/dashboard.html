@@ -163,6 +163,21 @@
 
         .btn-new-class:hover { background: #38b2bd; }
 
+        .btn-continue {
+            border: 1px solid #4dc9d6;
+            color: #2b8a92;
+            background: #fff;
+            border-radius: 20px;
+            padding: 11px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-continue:hover { background: #e8f7f9; }
+
         /* --- flash messages --- */
         .flash {
             padding: 7px 10px;
@@ -237,6 +252,9 @@
         <!-- Create buttons -->
         <div class="create-row">
             <a href="{{ url_for('create_class_route') }}" class="btn-new-class">+ New Class</a>
+            {% if has_continuable_classes %}
+                <a href="{{ url_for('continue_classes_route', year=year) }}" class="btn-continue">+ Add classes from last year</a>
+            {% endif %}
         </div>
 
         <div class="logout-wrap">

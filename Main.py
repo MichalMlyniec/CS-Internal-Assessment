@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from datetime import date
 from Login_Signup import DB_PATH, register_teacher, login_teacher, register_student, login_student
 from Year import current_school_year, make_year_string, parse_start_year
-from Class import create_class, get_classes, get_class, delete_class
+from Class import create_class, get_classes, get_class, delete_class, get_continuable_classes, continue_classes
 from Lesson import (
     create_lesson, get_lessons, get_lesson, get_lesson_public, delete_lesson, generate_qr_code, get_lan_ip,
     get_class_students, get_lesson_student_breakdown, get_student_history, get_student_engagement_summary
@@ -29,10 +29,11 @@ def init_db():
     ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS classes (
-            class_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            class_name TEXT    NOT NULL,
-            year_id    TEXT    NOT NULL,
-            teacher_id INTEGER NOT NULL
+            class_id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            class_name      TEXT    NOT NULL,
+            year_id         TEXT    NOT NULL,
+            teacher_id      INTEGER NOT NULL,
+            origin_class_id INTEGER
         )
     ''')
     cursor.execute('''
@@ -99,6 +100,11 @@ def init_db():
     response_columns = {row[1] for row in cursor.fetchall()}
     if 'lesson_id' not in response_columns:
         cursor.execute('ALTER TABLE responses ADD COLUMN lesson_id INTEGER')
+
+    cursor.execute('PRAGMA table_info(classes)')
+    class_columns = {row[1] for row in cursor.fetchall()}
+    if 'origin_class_id' not in class_columns:
+        cursor.execute('ALTER TABLE classes ADD COLUMN origin_class_id INTEGER')
 
     conn.commit()
     conn.close()
@@ -191,12 +197,14 @@ def dashboard():
     prev_year = make_year_string(start - 1)
     next_year = make_year_string(start + 1)
     classes   = get_classes(session['teacher_id'], year)
+    continuable_classes = get_continuable_classes(session['teacher_id'], prev_year, year)
     return render_template('dashboard.html',
         username=session['username'],
         classes=classes,
         year=year,
         prev_year=prev_year,
-        next_year=next_year
+        next_year=next_year,
+        has_continuable_classes=bool(continuable_classes)
     )
 
 
@@ -224,6 +232,33 @@ def create_class_route():
     return render_template('create_class.html', years=years, current=current)
 
 
+@app.route('/continue_classes', methods=['GET', 'POST'])
+def continue_classes_route():
+    if 'teacher_id' not in session:
+        return redirect(url_for('login'))
+
+    year      = request.args.get('year') or request.form.get('year') or current_school_year()
+    start     = parse_start_year(year)
+    prev_year = make_year_string(start - 1)
+
+    if request.method == 'POST':
+        class_ids = request.form.getlist('class_ids')
+
+        if not class_ids:
+            flash('Select at least one class to continue.', 'error')
+        else:
+            continue_classes(session['teacher_id'], class_ids, year)
+            flash('Classes added successfully.', 'success')
+            return redirect(url_for('dashboard', year=year))
+
+    classes = get_continuable_classes(session['teacher_id'], prev_year, year)
+    return render_template('continue_classes.html',
+        classes=classes,
+        year=year,
+        prev_year=prev_year
+    )
+
+
 @app.route('/class/<int:class_id>')
 def class_view(class_id):
     if 'teacher_id' not in session:
@@ -236,7 +271,16 @@ def class_view(class_id):
 
     lessons  = get_lessons(class_id)
     students = get_class_students(class_id)
-    return render_template('class.html', class_info=class_info, lessons=lessons, students=students)
+    origin_class = (
+        get_class(class_info['origin_class_id'], session['teacher_id'])
+        if class_info['origin_class_id'] else None
+    )
+    return render_template('class.html',
+        class_info=class_info,
+        lessons=lessons,
+        students=students,
+        origin_class=origin_class
+    )
 
 
 @app.route('/class/<int:class_id>/delete', methods=['POST'])

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Classes From Last Year</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 16px;
+        }
+
+        .card {
+            width: 320px;
+            border: 2px solid #b0b0b0;
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #4dc9d6;
+            padding: 18px 0;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .section-label {
+            font-weight: bold;
+            font-size: 0.92rem;
+            color: #111;
+            margin-bottom: 8px;
+        }
+
+        .class-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .class-checkbox { display: none; }
+
+        .class-label {
+            display: block;
+            border: 1px solid #b0b0b0;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            cursor: pointer;
+            background: #fff;
+            color: #222;
+        }
+
+        .class-checkbox:checked + .class-label {
+            background: #4dc9d6;
+            color: #fff;
+            border-color: #4dc9d6;
+        }
+
+        .placeholder {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .btn-new-class {
+            background: #4dc9d6;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-new-class:hover { background: #38b2bd; }
+
+        .flash {
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-size: 0.83rem;
+            text-align: center;
+        }
+        .flash.error   { background: #fde8e8; color: #c0392b; }
+        .flash.success { background: #e8fde8; color: #27ae60; }
+
+        .back-link {
+            font-size: 0.8rem;
+            color: #888;
+            text-decoration: none;
+            text-align: center;
+        }
+        .back-link:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>Add Classes From {{ prev_year }}</h1>
+    </div>
+    <div class="card-body">
+
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('continue_classes_route') }}" style="display:flex; flex-direction:column; gap:14px;">
+            <input type="hidden" name="year" value="{{ year }}">
+
+            <div>
+                <p class="section-label">Select classes to bring into {{ year }}:</p>
+                {% if classes %}
+                    <div class="class-list">
+                        {% for cls in classes %}
+                            <input
+                                type="checkbox"
+                                name="class_ids"
+                                id="class_{{ cls.class_id }}"
+                                value="{{ cls.class_id }}"
+                                class="class-checkbox"
+                            >
+                            <label for="class_{{ cls.class_id }}" class="class-label">{{ cls.class_name }}</label>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn-new-class">Add Selected Classes</button>
+                {% else %}
+                    <p class="placeholder">No classes from {{ prev_year }} to add.</p>
+                {% endif %}
+            </div>
+
+        </form>
+
+        <a href="{{ url_for('dashboard', year=year) }}" class="back-link">← Back to dashboard</a>
+
+    </div>
+</div>
+
+</body>
+</html>
